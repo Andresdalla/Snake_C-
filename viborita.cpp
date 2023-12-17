@@ -1,13 +1,14 @@
 #include <iostream>
 #include <conio.h>
-#include <ctime>
+#include <windows.h>
 using namespace std;
 bool gameOver;
 const int width = 20;
 const int height = 20;
 int x, y, fx, fy, score;
-enum direcc
-{
+int tailX[100], tailY[100];
+int nTail;
+enum direcc {
     STOP = 0,
     LEFT,
     RIGHT,
@@ -38,7 +39,7 @@ void Draw()
     {
         for (int j = 0; j < width; j++)
         {
-            if ((j == 0) || (j == width - 1))
+            if ((j == 0))
             {
                 cout << "#";
             }
@@ -52,7 +53,22 @@ void Draw()
             }
             else
             {
-                cout << " ";
+                bool printed = false;
+                for(int k = 0;k < nTail; k++)
+                {
+                    if((tailX[k] == j) && (tailY[k] == i)){
+                        cout << "o";
+                        printed = true;
+                    }
+                }
+                if(!printed){
+                    cout << " ";
+                }
+
+            }
+            if (j == width - 1)
+            {
+                cout << "#";
             }
         }
         cout << endl;
@@ -92,6 +108,22 @@ void Input()
 }
 void Logic()
 {
+    int prevX = tailX[0];
+    int prevY = tailY[0];
+    int prevX2,prevY2;
+    tailX[0] = x;
+    tailY[0] = y;
+
+    for (int i = 1;i < nTail; i++)
+    {
+        prevX2 = tailX[i];
+        prevY2 = tailY[i];
+        tailX[i] = prevX;
+        tailY[i] = prevY;
+        prevX = prevX2;
+        prevY = prevY2;
+  
+    }
     switch (dir)
     {
     case LEFT:
@@ -109,12 +141,32 @@ void Logic()
     default:
         break;
     }
-    if ((x < 0) || (x > height) || (y < 0) || (y > width))
+    if (x >= width)
     {
-        gameOver = true;
+        x = 0;
+    }
+    else if (x < 0)
+    {
+        x = width - 1;
+    }
+    if (y >= width)
+    {
+        y = 0;
+    }
+    else if (y < 0)
+    {
+        y = height - 1;
+    }
+    for(int i = 0; i < nTail; i++)
+    {
+        if((tailX[i] == x) && (tailY[i] == y))
+        {
+            gameOver = true;
+        }
     }
     if((x == fx) && (y == fy))
     {
+        nTail++;
         score += 10;
         fx = rand() % width;
         fy = rand() % height;
@@ -129,7 +181,7 @@ int main()
         Draw();
         Input();
         Logic();
-        _sleep(120);
+        Sleep(120);
     }
     return 0;
 }
